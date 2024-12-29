@@ -8,10 +8,12 @@ from cache.redis import get_redis
 from schemas.todo import TodoOut
 
 
-class RedisTodoService:
+class BaseRedisService:
     def __init__(self, redis: Annotated[Redis, Depends(get_redis)]):
         self.redis = redis
 
+
+class RedisTodoService(BaseRedisService):
     async def get_todo(self, todo_id: int) -> TodoOut | None:
         todo = await self.redis.get(f"todo:{todo_id}")
         if todo is None:
@@ -31,10 +33,7 @@ class RedisTodoService:
         await self.redis.delete(f"todo:{todo_id}")
 
 
-class RedisLogService:
-    def __init__(self, redis: Annotated[Redis, Depends(get_redis)]):
-        self.redis = redis
-
+class RedisLogService(BaseRedisService):
     async def add_log(self, log: dict) -> None:
         await self.redis.rpush("log:http", json.dumps(log))
 
