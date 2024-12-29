@@ -1,4 +1,14 @@
-class HTTPLog(object):
+class BaseStringLog:
+    def to_str(self):
+        raise NotImplementedError()
+
+
+class BaseDictLog:
+    def to_dict(self):
+        raise NotImplementedError()
+
+
+class HTTPLog(BaseDictLog, BaseStringLog):
     def __init__(
             self,
             url: str,
@@ -13,9 +23,6 @@ class HTTPLog(object):
         self.headers = headers
         self.url = url
         self.method = method
-
-    def __dict__(self):
-        return {"url": self.url, "method": self.method, "headers": self.headers}
 
     @property
     def headers(self) -> dict[str, list[str]]:
@@ -47,7 +54,10 @@ class HTTPLog(object):
                 ]
             self._headers = converted_headers
 
-    def get_str_log(self) -> str:
+    def to_dict(self) -> dict:
+        return {"url": self.url, "method": self.method, "headers": self.headers}
+
+    def to_str(self) -> str:
         headers_str_list = [
             f"{key}: {', '.join(value)}" for key, value in self._headers.items()
         ]
